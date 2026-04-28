@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RapidShield NEXUS — Crisis Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#020B18;
+  --surface:#071422;
+  --surface2:#0C1F35;
+  --border:#1a3050;
+  --border2:#0f2540;
+  --red:#FF2D55;
+  --red-dim:rgba(255,45,85,.12);
+  --gold:#FFD60A;
+  --gold-dim:rgba(255,214,10,.1);
+  --teal:#00D4FF;
+  --teal-dim:rgba(0,212,255,.1);
+  --green:#00FF88;
+  --green-dim:rgba(0,255,136,.1);
+  --orange:#FF6B35;
+  --orange-dim:rgba(255,107,53,.12);
+  --purple:#BF5AF2;
+  --text:#E8F1FF;
+  --muted:#5A7A9F;
+  --muted2:#334D6E;
+  --white:#fff;
+  --font:'Space Grotesk',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* SCANLINE EFFECT */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.012) 2px,rgba(0,212,255,.012) 4px);pointer-events:none;z-index:9999;}
+
+/* ── NAV ── */
+nav{
+  background:rgba(2,11,24,.92);backdrop-filter:blur(20px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:64px;position:sticky;top:0;z-index:1000;
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--display);font-size:22px;font-weight:800;
+  color:var(--white);letter-spacing:2px;display:flex;align-items:center;gap:10px;
+}
+.nav-logo .shield{
+  width:32px;height:32px;background:var(--red);
+  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+  animation:shieldPulse 3s ease-in-out infinite;
+}
+@keyframes shieldPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,45,85,.4)}50%{box-shadow:0 0 0 12px rgba(255,45,85,0)}}
+.nav-logo .brand-rs{color:var(--teal);}
+.nav-logo .brand-nexus{color:var(--muted);font-size:11px;font-family:var(--mono);letter-spacing:4px;margin-left:4px;margin-top:2px;}
+
+.nav-tabs{display:flex;gap:2px;background:rgba(255,255,255,.03);padding:4px;border-radius:10px;border:1px solid var(--border);}
+.tab{
+  padding:7px 18px;border-radius:7px;border:none;cursor:pointer;
+  font-size:12px;font-weight:600;font-family:var(--font);
+  background:transparent;color:var(--muted);transition:all .2s;letter-spacing:.5px;
+}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.06);}
+.tab.active{background:var(--surface2);color:var(--teal);border:1px solid var(--border);}
+
+.nav-right{display:flex;align-items:center;gap:16px;}
+.live-badge{
+  background:var(--red-dim);border:1px solid var(--red);
+  color:var(--red);font-size:10px;font-weight:700;
+  padding:4px 12px;border-radius:20px;letter-spacing:1px;
+  display:flex;align-items:center;gap:6px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:livePulse 1.2s infinite;}
+@keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.nav-clock{font-family:var(--mono);font-size:13px;color:var(--teal);letter-spacing:1px;}
+.gps-badge{font-family:var(--mono);font-size:10px;color:var(--green);background:var(--green-dim);padding:4px 10px;border-radius:20px;border:1px solid rgba(0,255,136,.2);}
+
+/* ── LAYOUT ── */
+.screen{display:none;padding:24px 28px;max-width:1600px;margin:0 auto;}
+.screen.active{display:block;}
+
+/* ── GLASS CARDS ── */
+.card{
+  background:var(--surface);border-radius:14px;border:1px solid var(--border);
+  padding:20px;position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--teal-dim),transparent);
+}
+.card-hdr{
+  font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.card-hdr::before{content:'';width:3px;height:14px;border-radius:2px;background:var(--teal);}
+
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+
+/* ── KPI CARDS ── */
+.kpi{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  padding:20px;position:relative;overflow:hidden;
+  transition:transform .2s,border-color .2s;cursor:default;
+}
+.kpi:hover{transform:translateY(-2px);border-color:var(--teal);}
+.kpi-accent{position:absolute;top:0;left:0;width:100%;height:2px;}
+.kpi-val{font-family:var(--mono);font-size:30px;font-weight:700;margin:8px 0 4px;}
+.kpi-lbl{font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.kpi-delta{font-size:10px;font-weight:600;margin-top:6px;font-family:var(--mono);}
+.kpi-icon{position:absolute;top:16px;right:16px;font-size:22px;opacity:.5;}
+
+/* ── BUTTONS ── */
+.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--font);transition:all .15s;letter-spacing:.5px;}
+.btn:active{transform:scale(.97);}
+.btn-red{background:var(--red);color:var(--white);}
+.btn-red:hover{background:#ff4466;box-shadow:0 0 20px rgba(255,45,85,.4);}
+.btn-teal{background:var(--teal);color:var(--bg);}
+.btn-teal:hover{box-shadow:0 0 20px rgba(0,212,255,.4);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);padding:10px 20px;}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+.btn-green{background:var(--green);color:var(--bg);}
+.btn-gold{background:var(--gold);color:var(--bg);}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.5px;}
+.badge-crit{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,45,85,.3);}
+.badge-mod{background:var(--orange-dim);color:var(--orange);border:1px solid rgba(255,107,53,.3);}
+.badge-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(0,255,136,.3);}
+.badge-blue{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,212,255,.3);}
+.badge-gold{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,214,10,.3);}
+.badge-purple{background:rgba(191,90,242,.12);color:var(--purple);border:1px solid rgba(191,90,242,.3);}
+
+/* ── INCIDENT CARDS ── */
+.inc-card{
+  background:var(--surface2);border-radius:12px;border:1px solid var(--border);
+  padding:14px 16px;margin-bottom:10px;cursor:pointer;
+  transition:all .2s;border-left:3px solid transparent;
+}
+.inc-card:hover{border-color:var(--teal);transform:translateX(3px);}
+.inc-card.crit{border-left-color:var(--red);}
+.inc-card.mod{border-left-color:var(--orange);}
+.inc-card.low{border-left-color:var(--green);}
+.inc-title{font-size:14px;font-weight:700;color:var(--text);}
+.inc-meta{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono);}
+
+/* ── CCTV FEED ── */
+.cctv-frame{
+  position:relative;border-radius:10px;overflow:hidden;
+  background:#000;border:1px solid var(--border);
+}
+.cctv-canvas{width:100%;height:180px;display:block;border-radius:10px;}
+.cctv-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  font-family:var(--mono);font-size:9px;color:rgba(0,255,136,.7);
+}
+.cctv-corner{position:absolute;}
+.cctv-corner.tl{top:8px;left:8px;}
+.cctv-corner.tr{top:8px;right:8px;text-align:right;}
+.cctv-corner.bl{bottom:8px;left:8px;}
+.cctv-corner.br{bottom:8px;right:8px;text-align:right;}
+.cctv-scan{
+  position:absolute;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,.6),transparent);
+  animation:scanLine 3s linear infinite;
+}
+@keyframes scanLine{0%{top:0}100%{top:100%}}
+.cctv-bbox{
+  position:absolute;border:2px solid var(--red);border-radius:2px;
+  transition:all .5s;
+}
+.bbox-label{
+  position:absolute;top:-20px;left:0;background:var(--red);
+  color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;
+}
+.cctv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* ── CANVAS MAP ── */
+.map-wrap{position:relative;border-radius:10px;overflow:hidden;background:#071824;height:280px;border:1px solid var(--border);}
+#mapCanvas{width:100%;height:100%;display:block;}
+.map-legend{
+  position:absolute;bottom:10px;right:10px;background:rgba(2,11,24,.85);
+  backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:8px;padding:8px 12px;
+}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:4px;}
+.map-legend-dot{width:8px;height:8px;border-radius:50%;}
+.map-coords{
+  position:absolute;bottom:10px;left:10px;background:rgba(2,11,24,.85);
+  backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:8px;padding:6px 10px;
+  font-family:var(--mono);font-size:9px;color:var(--teal);
+}
+
+/* ── SENSOR BARS ── */
+.sensor-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.sensor-label{font-size:12px;color:var(--text);width:180px;flex-shrink:0;}
+.sensor-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.sensor-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.sensor-val{font-family:var(--mono);font-size:11px;font-weight:700;width:70px;text-align:right;flex-shrink:0;}
+
+/* ── TIMELINE ── */
+.tl{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:12px;padding-bottom:16px;position:relative;}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:5px;top:14px;width:1px;height:calc(100% - 4px);background:var(--border);}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px;border:2px solid;}
+.tl-time{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:2px;}
+.tl-text{font-size:12px;color:var(--text);}
+
+/* ── STAFF ── */
+.staff-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);}
+.staff-av{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;font-family:var(--mono);}
+.staff-name{font-size:13px;font-weight:600;color:var(--text);}
+.staff-role{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-top:1px;}
+.staff-coords{font-size:10px;font-family:var(--mono);color:var(--teal);margin-top:2px;}
+.staff-status{margin-left:auto;font-size:11px;font-weight:700;font-family:var(--mono);}
+
+/* ── AI CHAT ── */
+.ai-msg{border-radius:10px;padding:12px 16px;margin-bottom:10px;font-size:13px;line-height:1.6;}
+.ai-msg.from-ai{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--teal);}
+.ai-msg.from-user{background:rgba(255,214,10,.06);border:1px solid rgba(255,214,10,.15);text-align:right;}
+.ai-msg-header{font-size:10px;font-weight:700;letter-spacing:1px;margin-bottom:6px;}
+.ai-input-wrap{display:flex;gap:10px;margin-top:12px;}
+.ai-input{
+  flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--font);font-size:13px;padding:10px 14px;outline:none;
+}
+.ai-input:focus{border-color:var(--teal);}
+
+/* ── AI TRIAGE CARD ── */
+.triage-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.triage-hdr{
+  background:linear-gradient(135deg,#071d36,#0c2a4a);
+  padding:16px 20px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.triage-hdr-title{color:var(--gold);font-size:13px;font-weight:700;font-family:var(--mono);}
+.triage-body{padding:18px 20px;}
+.ai-field{margin-bottom:14px;}
+.ai-field-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.ai-field-value{font-size:14px;font-weight:700;color:var(--text);}
+.ai-recommend{
+  background:rgba(255,214,10,.07);border:1px solid rgba(255,214,10,.2);
+  border-radius:10px;padding:14px 16px;font-size:12px;color:rgba(255,214,10,.9);
+  margin:14px 0;line-height:1.7;
+}
+.ai-rec-title{font-size:10px;font-weight:700;letter-spacing:1.5px;margin-bottom:8px;color:var(--gold);}
+.conf-bar-wrap{display:flex;align-items:center;gap:12px;}
+.conf-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--green));}
+
+/* ── SOS PHONE ── */
+.sos-phone{
+  background:linear-gradient(160deg,var(--surface2),#040e1c);
+  border-radius:32px;padding:24px 20px;max-width:340px;margin:0 auto;
+  border:1px solid var(--border);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,212,255,.05);
+}
+.sos-sbar{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-family:var(--mono);margin-bottom:20px;}
+.sos-head{text-align:center;margin-bottom:20px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.12);border-radius:12px;padding:12px;}
+.sos-btn-main{
+  background:linear-gradient(135deg,var(--red),#cc1133);color:white;border:none;
+  border-radius:18px;width:100%;padding:24px;font-size:20px;font-weight:800;
+  cursor:pointer;letter-spacing:2px;font-family:var(--display);
+  box-shadow:0 0 40px rgba(255,45,85,.3);transition:all .2s;
+}
+.sos-btn-main:hover{box-shadow:0 0 60px rgba(255,45,85,.5);transform:scale(1.02);}
+.sos-types{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.sos-type-btn{
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  color:var(--text);border-radius:10px;padding:14px 10px;cursor:pointer;
+  font-size:12px;font-weight:600;transition:all .15s;text-align:center;font-family:var(--font);
+}
+.sos-type-btn:hover,.sos-type-btn.sel{background:rgba(0,212,255,.1);border-color:var(--teal);color:var(--teal);}
+.sos-gps{
+  font-family:var(--mono);font-size:10px;color:var(--green);
+  text-align:center;margin-top:10px;background:var(--green-dim);
+  padding:6px;border-radius:8px;border:1px solid rgba(0,255,136,.15);
+}
+.sos-confirm{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);border-radius:14px;padding:18px;text-align:center;margin-top:16px;display:none;}
+.sos-eta{font-size:36px;font-weight:800;font-family:var(--mono);color:var(--gold);}
+
+/* ── ANALYTICS CHART ── */
+.bar-chart-wrap{display:flex;align-items:flex-end;gap:8px;height:140px;padding:8px 0;}
+.bar{border-radius:4px 4px 0 0;min-width:32px;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;cursor:pointer;transition:opacity .2s;position:relative;}
+.bar:hover{opacity:.8;}
+.bar-val{font-size:10px;font-weight:700;color:white;padding:3px 0;background:rgba(0,0,0,.2);width:100%;text-align:center;border-radius:3px 3px 0 0;font-family:var(--mono);}
+.bar-lbl{font-size:10px;color:var(--muted);margin-top:6px;text-align:center;font-family:var(--mono);}
+
+/* ── RISK METER ── */
+.risk-track{height:18px;border-radius:9px;background:var(--surface2);overflow:hidden;position:relative;}
+.risk-fill{height:100%;border-radius:9px;transition:width 1.5s ease;}
+
+/* ── NOTIFICATION ── */
+.notif{
+  position:fixed;top:76px;right:24px;
+  background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--red);border-radius:12px;
+  padding:14px 18px;min-width:300px;max-width:380px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:9998;
+  transform:translateX(calc(100% + 40px));transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.notif.show{transform:translateX(0);}
+.notif-title{font-size:13px;font-weight:700;color:var(--text);}
+.notif-body{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+
+/* ── AI SPINNER ── */
+.ai-thinking{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--teal);font-size:12px;font-family:var(--mono);}
+.ai-dots span{width:5px;height:5px;border-radius:50%;background:var(--teal);display:inline-block;animation:dotBounce .8s infinite;margin:0 1px;}
+.ai-dots span:nth-child(2){animation-delay:.15s;}
+.ai-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dotBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+/* ── CHARTS ── */
+#analyticsChart{width:100%;height:160px;}
+
+/* ── ALERT FEED ── */
+.feed-item{
+  display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);
+  animation:feedIn .4s ease;
+}
+@keyframes feedIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.feed-time{font-size:10px;color:var(--muted);font-family:var(--mono);}
+.feed-text{font-size:12px;color:var(--text);line-height:1.5;}
+
+/* ── GPS COORDS ── */
+.gps-live{font-family:var(--mono);font-size:11px;color:var(--green);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── SECTION TITLE ── */
+.section-title{font-family:var(--display);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+
+/* ── HACKATHON BANNER ── */
+.hack-banner{
+  background:linear-gradient(135deg,rgba(255,214,10,.08),rgba(191,90,242,.08));
+  border:1px solid rgba(255,214,10,.25);border-radius:12px;padding:14px 20px;
+  display:flex;align-items:center;gap:16px;margin-bottom:20px;
+}
+.hack-badge{background:var(--gold);color:var(--bg);font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:1px;white-space:nowrap;}
+.hack-text{font-size:13px;color:rgba(255,255,255,.8);line-height:1.5;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){.g2,.g3,.g4,.g5{grid-template-columns:1fr;}.tab span{display:none;}}
+
+/* ── UTILITY GLOWS ── */
+.glow-red{text-shadow:0 0 20px rgba(255,45,85,.5);}
+.glow-teal{text-shadow:0 0 20px rgba(0,212,255,.5);}
+.glow-green{text-shadow:0 0 20px rgba(0,255,136,.5);}
+
+/* ── PULSE RINGS ── */
+.pulse-ring-outer{position:absolute;border-radius:50%;border:2px solid;opacity:0;animation:ringOut 2s ease-out infinite;}
+@keyframes ringOut{0%{transform:translate(-50%,-50%) scale(.5);opacity:.8}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0}}
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <div style="display:flex;justify-content:space-between;align-items:start;">
+    <div>
+      <div class="notif-title" id="notif-title">Alert</div>
+      <div class="notif-body" id="notif-body">—</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;" id="notif-time">NOW</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="shield">🛡</div>
+    <div>
+      <span style="color:white;">RAPID</span><span class="brand-rs">SHIELD</span>
+      <div class="brand-nexus">NEXUS v2.0</div>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="tab active" onclick="goTo('dashboard')">⬛ Dashboard</button>
+    <button class="tab" onclick="goTo('sos')">⚠ Guest SOS</button>
+    <button class="tab" onclick="goTo('triage')">🤖 AI Triage</button>
+    <button class="tab" onclick="goTo('cctv')">📡 CCTV · AI</button>
+    <button class="tab" onclick="goTo('analytics')">📊 Analytics</button>
+  </div>
+
+  <div class="nav-right">
+    <div class="gps-badge">📍 <span id="gps-nav">Fetching GPS...</span></div>
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div class="nav-clock" id="clock">--:--:--</div>
+  </div>
+</nav>
+
+<!-- ═══════════ SCREEN 1: DASHBOARD ═══════════ -->
+<div class="screen active" id="screen-dashboard">
+
+  <div class="hack-banner">
+    <div class="hack-badge">🏆 HACKATHON MVP</div>
+    <div class="hack-text">
+      <strong>RapidShield NEXUS</strong> — AI-powered crisis response with real-time GPS tracking, CCTV anomaly detection, and autonomous incident triage for hospitality & public venues.
+    </div>
+    <div style="margin-left:auto;text-align:right;flex-shrink:0;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--teal);">INCIDENT #2847</div>
+      <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--red);" id="main-timer">00:47</div>
+      <div style="font-size:10px;color:var(--muted);">ACTIVE RESPONSE</div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="g5" style="margin-bottom:20px;">
+    <div class="kpi">
+      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--red),transparent);"></div>
+      <div class="kpi-icon">🔥</div>
+      <div class="kpi-lbl">ACTIVE INCIDENTS</div>
+      <div class="kpi-val glow-red" style="color:var(--red);" id="kpi-incidents">2</div>
+      <div class="kpi-delta" style="color:var(--red);">▲ +1 since last hour</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--gold),transparent);"></div>
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-lbl">AVG RESPONSE TIME</div>
+      <div class="kpi-val" style="color:var(--gold);" id="kpi-resp">00:47</div>
+      <div class="kpi-delta" style="color:var(--green);">▼ 12s better than avg</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--green),transparent);"></div>
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-lbl">STAFF ON DUTY</div>
+      <div class="kpi-val glow-green" style="color:var(--green);">12</div>
+      <div class="kpi-delta" style="color:var(--teal);">4 responding now</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--teal),transparent);"></div>
+      <div class="kpi-icon">🧠</div>
+      <div class="kpi-lbl">AI CONFIDENCE</div>
+      <div class="kpi-val glow-teal" style="color:var(--teal);">97.3%</div>
+      <div class="kpi-delta" style="color:var(--green);">Model: Gemini 1.5</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-accent" style="background:linear-gradient(90deg,var(--purple),transparent);"></div>
+      <div class="kpi-icon">📡</div>
+      <div class="kpi-lbl">CCTV STREAMS</div>
+      <div class="kpi-val" style="color:var(--purple);">8/8</div>
+      <div class="kpi-delta" style="color:var(--green);">All online ✓</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:16px;">
+    <!-- MAP -->
+    <div class="card">
+      <div class="card-hdr">🗺 Live Property Map — Real-Time GPS Tracking</div>
+      <div class="map-wrap">
+        <canvas id="mapCanvas"></canvas>
+        <div class="map-coords" id="map-coords">LAT: — &nbsp;|&nbsp; LNG: —</div>
+        <div class="map-legend">
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--red);"></div>Critical Incident</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--orange);"></div>Active Alert</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--green);"></div>Staff (GPS Live)</div>
+          <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--teal);box-shadow:0 0 6px var(--teal);"></div>You</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">📍 Your GPS: <span id="user-gps" style="color:var(--teal);">Fetching...</span></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);">🔄 Refresh: <span style="color:var(--green);">Live (3s)</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- INCIDENTS -->
+      <div class="card">
+        <div class="card-hdr">🚨 Active Incidents</div>
+        <div class="inc-card crit" onclick="goTo('triage');switchTriage(0)">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div>
+              <div class="inc-title">🔥 Fire — Block B, Floor 2</div>
+              <div class="inc-meta">CAM-B203 · Smoke #412 · <span id="inc-time-1">00:47</span> ago</div>
+            </div>
+            <span class="badge badge-crit">CRITICAL</span>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;"><div style="height:100%;width:88%;background:var(--red);border-radius:2px;"></div></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono);">AI: 97.3% confidence · ~34 at risk · AUTO-DISPATCH SENT</div>
+          </div>
+        </div>
+        <div class="inc-card mod" onclick="goTo('triage');switchTriage(1)">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <div>
+              <div class="inc-title">🏥 Medical Emergency — Lobby</div>
+              <div class="inc-meta">Guest SOS · Room 218 · 12:03 ago</div>
+            </div>
+            <span class="badge badge-mod">MODERATE</span>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;"><div style="height:100%;width:52%;background:var(--orange);border-radius:2px;"></div></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;font-family:var(--mono);">AI: 91.8% confidence · 1 person · Nurse en route</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF GPS -->
+      <div class="card" style="flex:1;">
+        <div class="card-hdr">📍 Staff GPS — Live Positions</div>
+        <div class="staff-row">
+          <div class="staff-av" style="background:rgba(0,212,255,.1);color:var(--teal);">SR</div>
+          <div>
+            <div class="staff-name">Guard Shalem Raju</div>
+            <div class="staff-role">SECURITY</div>
+            <div class="staff-coords" id="gps-sr">GPS: updating...</div>
+          </div>
+          <div class="staff-status" style="color:var(--green);">EN ROUTE →</div>
+        </div>
+        <div class="staff-row">
+          <div class="staff-av" style="background:rgba(0,255,136,.1);color:var(--green);">VE</div>
+          <div>
+            <div class="staff-name">Mgr. Vishal Erotu</div>
+            <div class="staff-role">DUTY MANAGER</div>
+            <div class="staff-coords" id="gps-ve">GPS: updating...</div>
+          </div>
+          <div class="staff-status" style="color:var(--teal);">ON SCENE ✓</div>
+        </div>
+        <div class="staff-row">
+          <div class="staff-av" style="background:rgba(255,107,53,.1);color:var(--orange);">TS</div>
+          <div>
+            <div class="staff-name">Nurse Tangudu Srija</div>
+            <div class="staff-role">MEDICAL</div>
+            <div class="staff-coords" id="gps-ts">GPS: updating...</div>
+          </div>
+          <div class="staff-status" style="color:var(--orange);">RESPONDING</div>
+        </div>
+        <div class="staff-row" style="border:none;">
+          <div class="staff-av" style="background:rgba(191,90,242,.1);color:var(--purple);">TP</div>
+          <div>
+            <div class="staff-name">Tech. Trinath Panda</div>
+            <div class="staff-role">MAINTENANCE</div>
+            <div class="staff-coords" id="gps-tp">GPS: updating...</div>
+          </div>
+          <div class="staff-status" style="color:var(--muted);">STANDBY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY FEED + SENSORS -->
+  <div class="g2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div class="card-hdr" style="margin:0;">⚡ Live Activity Feed</div>
+        <button class="btn btn-ghost" style="font-size:11px;padding:6px 12px;" onclick="simulateAlert()">+ Simulate Alert</button>
+      </div>
+      <div id="feed" style="max-height:300px;overflow-y:auto;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">📟 Real-Time Sensor Telemetry</div>
+      <div id="sensors">
+        <div class="sensor-row">
+          <div class="sensor-label">🔥 Smoke Sensor #412 (B2)</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-smoke" style="width:88%;background:var(--red);"></div></div>
+          <div class="sensor-val" style="color:var(--red);" id="sv-smoke">HIGH ▲</div>
+        </div>
+        <div class="sensor-row">
+          <div class="sensor-label">🌡 Temp Sensor #412 (B2)</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-temp" style="width:72%;background:var(--orange);"></div></div>
+          <div class="sensor-val" style="color:var(--orange);" id="sv-temp">68°C</div>
+        </div>
+        <div class="sensor-row">
+          <div class="sensor-label">💨 CO₂ Level (Kitchen)</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-co2" style="width:45%;background:var(--gold);"></div></div>
+          <div class="sensor-val" style="color:var(--gold);" id="sv-co2">420ppm</div>
+        </div>
+        <div class="sensor-row">
+          <div class="sensor-label">🚶 Motion — Parking B1</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-motion" style="width:20%;background:var(--teal);"></div></div>
+          <div class="sensor-val" style="color:var(--teal);" id="sv-motion">LOW</div>
+        </div>
+        <div class="sensor-row">
+          <div class="sensor-label">💧 Water/Flood — Basement</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-flood" style="width:5%;background:var(--green);"></div></div>
+          <div class="sensor-val" style="color:var(--green);" id="sv-flood">CLEAR</div>
+        </div>
+        <div class="sensor-row">
+          <div class="sensor-label">🔊 Noise Level — Pool Area</div>
+          <div class="sensor-track"><div class="sensor-fill" id="s-noise" style="width:60%;background:var(--purple);"></div></div>
+          <div class="sensor-val" style="color:var(--purple);" id="sv-noise">72 dB</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 2: GUEST SOS ═══════════ -->
+<div class="screen" id="screen-sos">
+  <div class="g2" style="align-items:start;gap:24px;">
+    <div>
+      <div class="section-title">Guest SOS Interface</div>
+      <div class="section-sub">What guests see — scan QR · tap NFC · zero app needed · GPS auto-captured</div>
+      <div class="sos-phone">
+        <div class="sos-sbar"><span>9:41</span><span>📶 📡 92%</span></div>
+        <div class="sos-head">
+          <div style="font-family:var(--display);color:var(--teal);font-size:18px;font-weight:800;letter-spacing:2px;">RAPIDSHIELD</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">The Recipies 5-142 Tekkali · Room 412</div>
+        </div>
+        <button class="sos-btn-main" id="sos-main-btn" onclick="triggerSOS()">🚨 EMERGENCY SOS</button>
+        <div class="sos-types">
+          <button class="sos-type-btn" onclick="selType(this,'Fire')">🔥 Fire</button>
+          <button class="sos-type-btn" onclick="selType(this,'Medical')">🏥 Medical</button>
+          <button class="sos-type-btn" onclick="selType(this,'Security')">🔒 Security</button>
+          <button class="sos-type-btn" onclick="selType(this,'Other')">⚡ Other</button>
+        </div>
+        <div class="sos-gps" id="sos-gps-display">📍 GPS: Fetching location...</div>
+        <div class="sos-confirm" id="sos-confirm">
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">✓ HELP IS ON THE WAY</div>
+          <div class="sos-eta" id="sos-eta">89</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">seconds estimated response time</div>
+          <div style="font-size:11px;margin-top:12px;color:rgba(255,255,255,.7);line-height:1.6;">Stay calm. Move to the nearest exit.<br>Staff have been alerted. Your GPS is shared.</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-hdr">⚙ How It Works — Zero Friction</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:30px;height:30px;border-radius:8px;background:var(--red-dim);border:1px solid rgba(255,45,85,.3);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;font-family:var(--mono);">1</div>
+            <div><div style="font-size:13px;font-weight:600;">Scan QR / Tap NFC / SMS</div><div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;">Every room, exit, elevator has NFC + QR → instant access, no app install ever.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:30px;height:30px;border-radius:8px;background:var(--orange-dim);border:1px solid rgba(255,107,53,.3);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;font-family:var(--mono);">2</div>
+            <div><div style="font-size:13px;font-weight:600;">One Press Emergency</div><div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;">Browser Geolocation API captures GPS instantly. Room tag auto-links exact position.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:30px;height:30px;border-radius:8px;background:var(--teal-dim);border:1px solid rgba(0,212,255,.3);color:var(--teal);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;font-family:var(--mono);">3</div>
+            <div><div style="font-size:13px;font-weight:600;">AI Classifies in &lt;3 Seconds</div><div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;">Gemini AI cross-references sensor data, CCTV feed, and prior history for severity score.</div></div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:30px;height:30px;border-radius:8px;background:var(--green-dim);border:1px solid rgba(0,255,136,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;font-family:var(--mono);">4</div>
+            <div><div style="font-size:13px;font-weight:600;">Auto-Dispatch + Multi-Channel Alert</div><div style="font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;">Push + SMS + PA + Dashboard + First Responder API — all simultaneously within 5 seconds.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📡 Alert Channels</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border);">
+            <div style="font-size:22px;">📱</div>
+            <div style="font-size:12px;font-weight:600;margin-top:6px;">Push Alert</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">All staff apps</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border);">
+            <div style="font-size:22px;">💬</div>
+            <div style="font-size:12px;font-weight:600;margin-top:6px;">SMS via Twilio</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">MSG91 fallback</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border);">
+            <div style="font-size:22px;">📢</div>
+            <div style="font-size:12px;font-weight:600;margin-top:6px;">PA Broadcast</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">IP Audio System</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border);">
+            <div style="font-size:22px;">🚒</div>
+            <div style="font-size:12px;font-weight:600;margin-top:6px;">Auto-Dispatch</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px;">Fire · Police · 108</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 3: AI TRIAGE ═══════════ -->
+<div class="screen" id="screen-triage">
+  <div class="g2" style="margin-bottom:14px;gap:10px;">
+    <button class="btn btn-red" id="tri-tab-0" onclick="switchTriage(0)" style="display:flex;align-items:center;justify-content:center;gap:8px;">🔥 Fire — Block B2 <span class="badge badge-crit" style="background:rgba(255,255,255,.15);color:white;">CRITICAL</span></button>
+    <button class="btn btn-ghost" id="tri-tab-1" onclick="switchTriage(1)">🏥 Medical — Lobby <span class="badge badge-mod">MODERATE</span></button>
+  </div>
+
+  <!-- FIRE PANEL -->
+  <div id="tri-panel-0" class="g2">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="triage-card">
+        <div class="triage-hdr">
+          <div class="triage-hdr-title">⚡ INCIDENT #2847 — LIVE</div>
+          <div style="color:var(--muted);font-size:12px;font-family:var(--mono);" id="tri-timer">00:47</div>
+        </div>
+        <div class="triage-body">
+          <div class="g2" style="gap:12px;margin-bottom:16px;">
+            <div class="ai-field"><div class="ai-field-label">Type</div><div class="ai-field-value" style="color:var(--red);">🔥 Fire — Kitchen</div></div>
+            <div class="ai-field"><div class="ai-field-label">Location</div><div class="ai-field-value">Block B, Floor 2</div></div>
+            <div class="ai-field"><div class="ai-field-label">Severity</div><div class="ai-field-value" style="color:var(--red);">Level 4 / CRITICAL</div></div>
+            <div class="ai-field"><div class="ai-field-label">Persons at Risk</div><div class="ai-field-value" style="color:var(--red);">~34</div></div>
+          </div>
+          <div class="ai-field">
+            <div class="ai-field-label">AI Confidence Score</div>
+            <div class="conf-bar-wrap" style="margin-top:6px;">
+              <div class="conf-track"><div class="conf-fill" style="width:97%;"></div></div>
+              <div style="font-family:var(--mono);font-size:14px;font-weight:800;color:var(--green);">97.3%</div>
+            </div>
+          </div>
+          <div class="ai-field">
+            <div class="ai-field-label">Data Sources Fused</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+              <span class="badge badge-blue">CCTV #B203</span>
+              <span class="badge badge-blue">Smoke #412</span>
+              <span class="badge badge-blue">Guest SOS #38</span>
+              <span class="badge badge-gold">Thermal Cam</span>
+              <span class="badge badge-purple">AI Vision</span>
+            </div>
+          </div>
+          <div class="ai-recommend">
+            <div class="ai-rec-title">🤖 GEMINI AI AUTONOMOUS RECOMMENDATION</div>
+            Evacuate B-wing immediately via exits E2 & E4. Dispatch fire team to B2 kitchen. Alert all guests via PA. Auto-notify fire brigade (108). Seal HVAC Zone 2. Estimated containment: 8 minutes if action taken now.
+          </div>
+          <div style="display:flex;gap:10px;" id="dispatch-btns">
+            <button class="btn btn-red" style="flex:1;" onclick="approveDispatch()">✅ Approve & Dispatch</button>
+            <button class="btn btn-ghost" onclick="goTo('dashboard')">← Back</button>
+          </div>
+          <div id="dispatch-done" style="display:none;background:var(--green-dim);border:1px solid rgba(0,255,136,.3);border-radius:10px;padding:14px;text-align:center;">
+            <div style="color:var(--green);font-weight:700;font-size:14px;">✓ DISPATCHED — 3 units en route</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--mono);">Fire Brigade ETA: 4 min · Hotel Team: ON SCENE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI CHAT -->
+      <div class="card">
+        <div class="card-hdr">🤖 AI Incident Assistant (Gemini)</div>
+        <div id="ai-chat" style="max-height:200px;overflow-y:auto;margin-bottom:8px;">
+          <div class="ai-msg from-ai">
+            <div class="ai-msg-header" style="color:var(--teal);">GEMINI AI · NOW</div>
+            I've detected a critical fire signature in Block B Floor 2. Smoke density at 88% threshold. Thermal anomaly confirmed at 68°C. Auto-dispatching response team. Would you like me to trigger evacuation PA broadcast?
+          </div>
+        </div>
+        <div class="ai-input-wrap">
+          <input class="ai-input" id="ai-chat-input" placeholder="Ask AI: Suggest evacuation route... status update... resource needs..." onkeydown="if(event.key==='Enter')sendAIMsg()">
+          <button class="btn btn-teal" onclick="sendAIMsg()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="card">
+        <div class="card-hdr">📟 Real-Time Sensor Feed — Zone B2</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="sensor-row">
+            <div class="sensor-label">🔥 Smoke #412 (B2)</div>
+            <div class="sensor-track"><div class="sensor-fill" id="t-smoke" style="width:88%;background:var(--red);"></div></div>
+            <div class="sensor-val" style="color:var(--red);" id="tv-smoke">HIGH ▲</div>
+          </div>
+          <div class="sensor-row">
+            <div class="sensor-label">🌡 Temp #412 (B2)</div>
+            <div class="sensor-track"><div class="sensor-fill" id="t-temp" style="width:72%;background:var(--orange);"></div></div>
+            <div class="sensor-val" style="color:var(--orange);" id="tv-temp">68°C</div>
+          </div>
+          <div class="sensor-row">
+            <div class="sensor-label">💨 CO₂ Kitchen</div>
+            <div class="sensor-track"><div class="sensor-fill" id="t-co2" style="width:45%;background:var(--gold);"></div></div>
+            <div class="sensor-val" style="color:var(--gold);" id="tv-co2">420ppm</div>
+          </div>
+        </div>
+        <div class="card-hdr" style="margin-top:16px;">📷 CCTV #B203 — AI Detection Active</div>
+        <div class="cctv-frame">
+          <canvas class="cctv-canvas" id="cctv-triage" height="160"></canvas>
+          <div class="cctv-overlay">
+            <div class="cctv-scan"></div>
+            <div class="cctv-corner tl">CAM: B203<br>STATUS: LIVE</div>
+            <div class="cctv-corner tr">AI: ANOMALY DETECTED<br>CONF: 97.3%</div>
+            <div class="cctv-corner bl">FIRE DETECTED ⚠</div>
+            <div class="cctv-corner br" id="cctv-ts-triage">--:--:--</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr">📋 Incident Timeline</div>
+        <div class="tl" id="inc-timeline">
+          <div class="tl-item"><div class="tl-dot" style="background:var(--red);border-color:var(--red);"></div><div><div class="tl-time">00:47 ago</div><div class="tl-text">🔥 Fire detected — Smoke #412 + CCTV B203</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--teal);border-color:var(--teal);"></div><div><div class="tl-time">00:50 ago</div><div class="tl-text">🤖 Gemini AI: CRITICAL · Fire (97.3%) — auto classified</div></div></div>
+          <div class="tl-item"><div class="tl-dot" style="background:var(--gold);border-color:var(--gold);"></div><div><div class="tl-time">00:52 ago</div><div class="tl-text">📱 6 staff alerted via Push + SMS simultaneously</div></div></div>
+          <div class="tl-item" style="padding:0;"><div class="tl-dot" style="background:var(--orange);border-color:var(--orange);"></div><div><div class="tl-time">NOW</div><div class="tl-text">⏳ Awaiting dispatch confirmation</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDICAL PANEL -->
+  <div id="tri-panel-1" style="display:none;" class="g2">
+    <div class="triage-card">
+      <div class="triage-hdr">
+        <div class="triage-hdr-title">⚡ INCIDENT #2848 — ACTIVE</div>
+        <div style="color:var(--muted);font-size:12px;font-family:var(--mono);">12:03</div>
+      </div>
+      <div class="triage-body">
+        <div class="g2" style="gap:12px;margin-bottom:16px;">
+          <div class="ai-field"><div class="ai-field-label">Type</div><div class="ai-field-value" style="color:var(--orange);">🏥 Medical</div></div>
+          <div class="ai-field"><div class="ai-field-label">Location</div><div class="ai-field-value">Lobby, Ground Floor</div></div>
+          <div class="ai-field"><div class="ai-field-label">Severity</div><div class="ai-field-value" style="color:var(--orange);">Level 3 / Moderate</div></div>
+          <div class="ai-field"><div class="ai-field-label">Persons at Risk</div><div class="ai-field-value" style="color:var(--orange);">1</div></div>
+        </div>
+        <div class="ai-field">
+          <div class="ai-field-label">AI Confidence</div>
+          <div class="conf-bar-wrap" style="margin-top:6px;">
+            <div class="conf-track"><div class="conf-fill" style="width:91%;"></div></div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:800;color:var(--green);">91.8%</div>
+          </div>
+        </div>
+        <div class="ai-recommend">
+          <div class="ai-rec-title">🤖 GEMINI AI RECOMMENDATION</div>
+          Dispatch on-site nurse to lobby immediately. Clear surrounding area. Prepare first-aid kit #3. If unconscious, call 108. Guest from Room 218 — contact family via PMS system. Estimated stabilization: 4 minutes.
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-teal" style="flex:1;" onclick="showNotif('Medical unit dispatched to Lobby ✓','Nurse Tangudu Srija en route. ETA: 2 min.','teal')">✅ Dispatch Medical Team</button>
+          <button class="btn btn-ghost" onclick="goTo('dashboard')">← Back</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">📋 Medical Timeline</div>
+      <div class="tl">
+        <div class="tl-item"><div class="tl-dot" style="background:var(--orange);border-color:var(--orange);"></div><div><div class="tl-time">12:03 ago</div><div class="tl-text">🏥 Guest SOS received — Room 218</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--teal);border-color:var(--teal);"></div><div><div class="tl-time">12:05 ago</div><div class="tl-text">🤖 AI classified: Medical Emergency (91.8%)</div></div></div>
+        <div class="tl-item" style="padding:0;"><div class="tl-dot" style="background:var(--gold);border-color:var(--gold);"></div><div><div class="tl-time">Now</div><div class="tl-text">👩‍⚕️ Nurse Tangudu Srija responding</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 4: CCTV AI ═══════════ -->
+<div class="screen" id="screen-cctv">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div>
+      <div class="section-title">CCTV · AI Detection Grid</div>
+      <div class="section-sub">Computer vision anomaly detection — 8 live streams · Real-time bounding box inference</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <span class="badge badge-crit">⚠ 1 ANOMALY</span>
+      <span class="badge badge-ok">✓ 7 CLEAR</span>
+      <button class="btn btn-ghost" style="font-size:11px;" onclick="triggerAnomaly()">🔴 Simulate Detection</button>
+    </div>
+  </div>
+
+  <div class="cctv-grid" style="gap:12px;grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+    <div class="card" style="padding:12px;">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--red);margin-bottom:6px;display:flex;justify-content:space-between;"><span>CAM-B203 · FLOOR 2</span><span class="badge badge-crit" style="font-size:9px;">ANOMALY</span></div>
+      <div class="cctv-frame"><canvas class="cctv-canvas" id="cam-b203" height="120"></canvas><div class="cctv-overlay"><div class="cctv-scan"></div><div class="cctv-corner bl" style="font-size:8px;">FIRE DETECTED</div><div class="cctv-corner tr" style="font-size:8px;" id="cam-ts-1">--:--</div></div></div>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--green);margin-bottom:6px;display:flex;justify-content:space-between;"><span>CAM-L001 · LOBBY</span><span class="badge badge-ok" style="font-size:9px;">CLEAR</span></div>
+      <div class="cctv-frame"><canvas class="cctv-canvas" id="cam-lobby" height="120"></canvas><div class="cctv-overlay"><div class="cctv-scan" style="animation-duration:4s;"></div><div class="cctv-corner tr" style="font-size:8px;" id="cam-ts-2">--:--</div></div></div>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--green);margin-bottom:6px;display:flex;justify-content:space-between;"><span>CAM-P001 · PARKING</span><span class="badge badge-ok" style="font-size:9px;">CLEAR</span></div>
+      <div class="cctv-frame"><canvas class="cctv-canvas" id="cam-park" height="120"></canvas><div class="cctv-overlay"><div class="cctv-scan" style="animation-duration:5s;"></div><div class="cctv-corner tr" style="font-size:8px;" id="cam-ts-3">--:--</div></div></div>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--green);margin-bottom:6px;display:flex;justify-content:space-between;"><span>CAM-E001 · EXIT</span><span class="badge badge-ok" style="font-size:9px;">CLEAR</span></div>
+      <div class="cctv-frame"><canvas class="cctv-canvas" id="cam-exit" height="120"></canvas><div class="cctv-overlay"><div class="cctv-scan" style="animation-duration:3.5s;"></div><div class="cctv-corner tr" style="font-size:8px;" id="cam-ts-4">--:--</div></div></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr">🔴 CAM-B203 Focus — AI Bounding Box Detection</div>
+      <div class="cctv-frame" style="position:relative;">
+        <canvas id="cam-focus" width="600" height="260" style="width:100%;height:260px;border-radius:10px;"></canvas>
+        <div class="cctv-overlay">
+          <div class="cctv-scan" style="animation-duration:2s;"></div>
+          <div class="cctv-corner tl">CAM-B203 · FLOOR 2 · LIVE<br>RESOLUTION: 1080p</div>
+          <div class="cctv-corner tr">🔴 ANOMALY DETECTED<br>FIRE · CONF 97.3%<br>AREA: KITCHEN</div>
+          <div class="cctv-corner bl">PERSONS DETECTED: <span id="person-count">3</span></div>
+          <div class="cctv-corner br" id="cam-ts-focus">--:--:--</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+        <span class="badge badge-crit">🔴 Fire Signature</span>
+        <span class="badge badge-orange">👤 3 Persons Detected</span>
+        <span class="badge badge-gold">🌡 Thermal Spike</span>
+        <span class="badge badge-purple">💨 Smoke Plume</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">📊 AI Detection Log — Last 10 Events</div>
+      <div style="font-family:var(--mono);font-size:11px;" id="cctv-log">
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);color:var(--red);">
+          <span style="color:var(--muted);flex-shrink:0;" id="log-t-1">--:--:--</span>
+          <span>CAM-B203 · FIRE DETECTED · Conf 97.3%</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);color:var(--orange);">
+          <span style="color:var(--muted);flex-shrink:0;">12:02</span>
+          <span>CAM-L001 · CROWD DENSITY HIGH · Conf 84%</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);color:var(--green);">
+          <span style="color:var(--muted);flex-shrink:0;">11:55</span>
+          <span>CAM-P001 · MOTION CLEAR · Periodic check</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);color:var(--muted);">
+          <span style="flex-shrink:0;">11:48</span>
+          <span>CAM-E001 · EXIT FLOW NORMAL</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border2);color:var(--orange);">
+          <span style="color:var(--muted);flex-shrink:0;">11:32</span>
+          <span>CAM-B203 · UNATTENDED OBJECT · Resolved</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:6px 0;color:var(--muted);">
+          <span style="flex-shrink:0;">11:15</span>
+          <span>CAM-L001 · ALL CLEAR · Routine scan</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <div class="card-hdr">🧠 Model Pipeline</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+          <span style="color:var(--teal);">Input:</span> RTSP Stream → <span style="color:var(--teal);">Frame Extract:</span> 15fps → <span style="color:var(--teal);">YOLOv8:</span> Object/Person Detection → <span style="color:var(--gold);">Gemini Vision:</span> Context Understanding → <span style="color:var(--green);">Output:</span> Severity Score + Auto-Alert
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ SCREEN 5: ANALYTICS ═══════════ -->
+<div class="screen" id="screen-analytics">
+  <div class="g5" style="margin-bottom:20px;">
+    <div class="kpi"><div class="kpi-accent" style="background:linear-gradient(90deg,var(--teal),transparent);"></div><div class="kpi-lbl">AVG DETECTION TIME</div><div class="kpi-val" style="color:var(--teal);">47s</div><div class="kpi-delta" style="color:var(--green);">▼ 15% faster this week</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:linear-gradient(90deg,var(--green),transparent);"></div><div class="kpi-lbl">FASTER THAN MANUAL</div><div class="kpi-val" style="color:var(--green);">3.2×</div><div class="kpi-delta" style="color:var(--teal);">Cross-validated benchmark</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:linear-gradient(90deg,var(--gold),transparent);"></div><div class="kpi-lbl">INCIDENTS THIS MONTH</div><div class="kpi-val" style="color:var(--gold);">142</div><div class="kpi-delta" style="color:var(--muted);">▲ 8 vs last month</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:linear-gradient(90deg,var(--purple),transparent);"></div><div class="kpi-lbl">AI ACCURACY RATE</div><div class="kpi-val" style="color:var(--purple);">96.4%</div><div class="kpi-delta" style="color:var(--green);">↑ Model improving</div></div>
+    <div class="kpi"><div class="kpi-accent" style="background:linear-gradient(90deg,var(--orange),transparent);"></div><div class="kpi-lbl">LIVES IMPACTED</div><div class="kpi-val" style="color:var(--orange);">1.2K</div><div class="kpi-delta" style="color:var(--green);">Across 3 properties</div></div>
+  </div>
+
+  <div class="g2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr">📊 Incidents by Type — Last 30 Days</div>
+      <div class="bar-chart-wrap">
+        <div class="bar" style="background:linear-gradient(to top,var(--red),rgba(255,45,85,.5));height:85%;"><div class="bar-val">38</div><div class="bar-lbl">Fire</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--orange),rgba(255,107,53,.5));height:65%;"><div class="bar-val">29</div><div class="bar-lbl">Medical</div></div>
+        <div class="bar" style="background:linear-gradient(to top,#334D6E,#1a3050);height:50%;"><div class="bar-val">22</div><div class="bar-lbl">Security</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--teal),rgba(0,212,255,.5));height:38%;"><div class="bar-val">17</div><div class="bar-lbl">Gas/CO₂</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--gold),rgba(255,214,10,.5));height:25%;"><div class="bar-val">11</div><div class="bar-lbl">Flood</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--purple),rgba(191,90,242,.5));height:20%;"><div class="bar-val">9</div><div class="bar-lbl">Other</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">⚡ Response Time Trend — This Week</div>
+      <div class="bar-chart-wrap">
+        <div class="bar" style="background:linear-gradient(to top,var(--orange),rgba(255,107,53,.4));height:70%;"><div class="bar-val">62s</div><div class="bar-lbl">Mon</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--orange),rgba(255,107,53,.4));height:62%;"><div class="bar-val">55s</div><div class="bar-lbl">Tue</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--gold),rgba(255,214,10,.4));height:52%;"><div class="bar-val">47s</div><div class="bar-lbl">Wed</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--green),rgba(0,255,136,.4));height:42%;"><div class="bar-val">40s</div><div class="bar-lbl">Thu</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--green),rgba(0,255,136,.4));height:35%;"><div class="bar-val">35s</div><div class="bar-lbl">Fri</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--teal),rgba(0,212,255,.4));height:29%;"><div class="bar-val">30s</div><div class="bar-lbl">Sat</div></div>
+        <div class="bar" style="background:linear-gradient(to top,var(--teal),rgba(0,212,255,.4));height:24%;"><div class="bar-val">27s</div><div class="bar-lbl">Sun</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-hdr">🔮 Predictive Risk — Next 24 Hours</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;">Kitchen Area (B2)</span><span style="font-size:12px;font-weight:700;color:var(--red);font-family:var(--mono);">HIGH RISK</span></div>
+          <div class="risk-track"><div class="risk-fill" style="width:78%;background:linear-gradient(90deg,var(--red),var(--orange));"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Dinner service + high occupancy → elevated fire risk</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;">Pool Area</span><span style="font-size:12px;font-weight:700;color:var(--orange);font-family:var(--mono);">MODERATE</span></div>
+          <div class="risk-track"><div class="risk-fill" style="width:48%;background:linear-gradient(90deg,var(--orange),var(--gold));"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Weekend crowd → medical slip risk predicted</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;">Main Lobby</span><span style="font-size:12px;font-weight:700;color:var(--gold);font-family:var(--mono);">LOW-MED</span></div>
+          <div class="risk-track"><div class="risk-fill" style="width:32%;background:linear-gradient(90deg,var(--gold),var(--green));"></div></div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px;">Check-in rush hour approaching</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:13px;">Parking Basement</span><span style="font-size:12px;font-weight:700;color:var(--green);font-family:var(--mono);">LOW</span></div>
+          <div class="risk-track"><div class="risk-fill" style="width:15%;background:var(--green);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr">📋 Audit Log — Recent Incidents</div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;font-family:var(--mono);">
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="padding:8px;text-align:left;font-size:10px;color:var(--muted);">ID</th>
+          <th style="padding:8px;text-align:left;font-size:10px;color:var(--muted);">TYPE</th>
+          <th style="padding:8px;text-align:left;font-size:10px;color:var(--muted);">TIME</th>
+          <th style="padding:8px;text-align:left;font-size:10px;color:var(--muted);">STATUS</th>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border2);"><td style="padding:8px;color:var(--text);">#2847</td><td>Fire B2</td><td style="color:var(--red);">Active</td><td><span class="badge badge-crit">OPEN</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border2);"><td style="padding:8px;color:var(--text);">#2848</td><td>Medical</td><td>12m ago</td><td><span class="badge badge-mod">ACTIVE</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border2);"><td style="padding:8px;color:var(--text);">#2846</td><td>Security</td><td>38m ago</td><td><span class="badge badge-ok">RESOLVED</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border2);"><td style="padding:8px;color:var(--text);">#2845</td><td>Gas Leak</td><td>2h ago</td><td><span class="badge badge-ok">RESOLVED</span></td></tr>
+        <tr><td style="padding:8px;color:var(--text);">#2844</td><td>Medical</td><td>5h ago</td><td><span class="badge badge-ok">RESOLVED</span></td></tr>
+      </table>
+      <button class="btn btn-ghost" style="width:100%;margin-top:14px;font-size:11px;">⬇ Download Full Audit Report (PDF)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let sosType = null;
+let sosActive = false;
+let dashSec = 47;
+let alertCount = 0;
+let userLat = null, userLng = null;
+let animFrame = 0;
+let cctvFrame = 0;
+let anomalyActive = true;
+let bboxes = [{x:0.3,y:0.2,w:0.25,h:0.35,label:'FIRE',conf:'97.3%',color:'#FF2D55'},{x:0.55,y:0.4,w:0.12,h:0.28,label:'PERSON',conf:'99.1%',color:'#00D4FF'},{x:0.18,y:0.45,w:0.1,h:0.22,label:'PERSON',conf:'97.8%',color:'#00D4FF'}];
+const aiResponses = [
+  "Based on current sensor data, I recommend immediate evacuation of B-wing. The smoke density has increased 12% in the last 30 seconds.",
+  "CCTV B203 confirms 3 persons still in the affected zone. Fire Brigade should be notified via API — want me to trigger auto-call?",
+  "Evacuation Route Analysis: Use exits E2 (West) and E4 (North). Exit E1 is too close to the fire source — do not use.",
+  "Current temperature trend: +2°C every 45 seconds. Estimated time to critical threshold: 6 minutes. Act now.",
+  "I've cross-referenced this incident with historical data: similar fires at this property took 8.2 min average to contain. You're at 00:52.",
+  "All IoT sensors in Zone B2 are reporting. HVAC Zone 2 should be sealed immediately to prevent smoke spread to B-wing corridor.",
+];
+let aiIdx = 0;
+
+// ─── SCREEN NAV ───
+function goTo(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active');
+  });
+}
+
+function switchTriage(idx) {
+  document.getElementById('tri-panel-0').style.display = idx===0 ? 'grid' : 'none';
+  document.getElementById('tri-panel-1').style.display = idx===1 ? 'grid' : 'none';
+  document.getElementById('tri-tab-0').className = idx===0 ? 'btn btn-red' : 'btn btn-ghost';
+  document.getElementById('tri-tab-1').className = idx===1 ? 'btn btn-teal' : 'btn btn-ghost';
+}
+
+// ─── GPS ───
+function initGPS() {
+  if (!navigator.geolocation) {
+    setGPSFallback();
+    return;
+  }
+  navigator.geolocation.watchPosition(pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+    const fmt = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+    document.getElementById('gps-nav').textContent = fmt;
+    document.getElementById('user-gps').textContent = fmt;
+    document.getElementById('map-coords').textContent = `LAT: ${userLat.toFixed(6)}  |  LNG: ${userLng.toFixed(6)}`;
+    const d = document.getElementById('sos-gps-display');
+    if(d) d.textContent = `📍 GPS LOCKED: ${fmt} (±5m accuracy)`;
+  }, () => setGPSFallback(), {enableHighAccuracy:true,timeout:8000,maximumAge:3000});
+}
+
+function setGPSFallback() {
+  // Use Tekkali area coords (user's location from system)
+  userLat = 18.6036; userLng = 84.0020;
+  const fmt = `${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+  document.getElementById('gps-nav').textContent = fmt + ' (sim)';
+  document.getElementById('user-gps').textContent = fmt + ' (Tekkali)';
+  document.getElementById('map-coords').textContent = `LAT: ${userLat.toFixed(6)}  |  LNG: ${userLng.toFixed(6)}  [DEMO]`;
+  const d = document.getElementById('sos-gps-display');
+  if(d) d.textContent = `📍 GPS SIM: ${fmt} — Tekkali, AP`;
+}
+
+// ─── CLOCK ───
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('clock').textContent = t;
+  document.querySelectorAll('[id^="cctv-ts-"],[id^="cam-ts-"]').forEach(el => el.textContent = t);
+  if(document.getElementById('log-t-1')) document.getElementById('log-t-1').textContent = t;
+}
+setInterval(updateClock,1000); updateClock();
+
+// ─── TIMERS ───
+setInterval(() => {
+  dashSec++;
+  const m = String(Math.floor(dashSec/60)).padStart(2,'0');
+  const s = String(dashSec%60).padStart(2,'0');
+  const tm = m+':'+s;
+  if(document.getElementById('main-timer')) document.getElementById('main-timer').textContent = tm;
+  if(document.getElementById('kpi-resp')) document.getElementById('kpi-resp').textContent = tm;
+  if(document.getElementById('tri-timer')) document.getElementById('tri-timer').textContent = tm;
+  if(document.getElementById('inc-time-1')) document.getElementById('inc-time-1').textContent = tm;
+}, 1000);
+
+// ─── SENSORS ───
+function updateSensors() {
+  const smoke = 82 + Math.round(Math.random()*12);
+  const temp  = 62 + Math.round(Math.random()*14);
+  const co2   = 400 + Math.round(Math.random()*60);
+  const noise = 65 + Math.round(Math.random()*20);
+  const motion= Math.round(Math.random()*30);
+
+  [['s-smoke','sv-smoke', smoke+'%', smoke+'%', smoke>88?'#FF2D55':'#FF6B35'],
+   ['s-temp','sv-temp', (temp/100*100)+'%', temp+'°C', temp>70?'#FF6B35':'#FFD60A'],
+   ['s-co2','sv-co2', (co2/1000*100)+'%', co2+'ppm', co2>440?'#FFD60A':'#00D4FF'],
+   ['s-motion','sv-motion', motion+'%', motion>20?'ACTIVE':'LOW', '#00D4FF'],
+   ['s-noise','sv-noise', (noise/120*100)+'%', noise+' dB', '#BF5AF2']
+  ].forEach(([barId,valId,pct,label,color]) => {
+    const b=document.getElementById(barId), v=document.getElementById(valId);
+    if(b){b.style.width=pct;b.style.background=color;}
+    if(v){v.textContent=label;v.style.color=color;}
+  });
+
+  // Mirror to triage
+  [['t-smoke','tv-smoke',smoke+'%',smoke>88?'HIGH ▲':'ELEVATED','#FF2D55'],
+   ['t-temp','tv-temp',(temp/100*100)+'%',temp+'°C','#FF6B35'],
+   ['t-co2','tv-co2',(co2/1000*100)+'%',co2+'ppm','#FFD60A']
+  ].forEach(([b,v,p,l,c]) => {
+    const el=document.getElementById(b),vl=document.getElementById(v);
+    if(el){el.style.width=p;el.style.background=c;}
+    if(vl){vl.textContent=l;vl.style.color=c;}
+  });
+}
+setInterval(updateSensors, 2500); updateSensors();
+
+// ─── GPS STAFF SIMULATION ───
+const staffBase = {
+  sr: [18.6041, 84.0023],
+  ve: [18.6033, 84.0015],
+  ts: [18.6038, 84.0029],
+  tp: [18.6029, 84.0018]
+};
+function updateStaffGPS() {
+  Object.entries(staffBase).forEach(([id,[lat,lng]]) => {
+    const jLat = lat + (Math.random()-.5)*0.0002;
+    const jLng = lng + (Math.random()-.5)*0.0002;
+    const el = document.getElementById('gps-'+id);
+    if(el) el.textContent = `${jLat.toFixed(5)}, ${jLng.toFixed(5)}`;
+  });
+}
+setInterval(updateStaffGPS, 3000); updateStaffGPS();
+
+// ─── CANVAS MAP ───
+function drawMap() {
+  const canvas = document.getElementById('mapCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const W = canvas.width, H = canvas.height;
+
+  // Background
+  ctx.fillStyle = '#030e1c';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,212,255,0.06)';
+  ctx.lineWidth = 1;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Property blocks
+  const blocks = [
+    {x:.1,y:.1,w:.35,h:.3,label:'Block A',color:'rgba(0,212,255,.15)',border:'rgba(0,212,255,.4)'},
+    {x:.5,y:.1,w:.35,h:.3,label:'Block B ⚠',color:'rgba(255,45,85,.15)',border:'rgba(255,45,85,.6)'},
+    {x:.1,y:.5,w:.2,h:.35,label:'Parking',color:'rgba(0,212,255,.08)',border:'rgba(0,212,255,.2)'},
+    {x:.35,y:.5,w:.3,h:.35,label:'Pool',color:'rgba(0,255,136,.08)',border:'rgba(0,255,136,.25)'},
+    {x:.7,y:.5,w:.2,h:.35,label:'Kitchen',color:'rgba(255,214,10,.1)',border:'rgba(255,214,10,.3)'},
+  ];
+  blocks.forEach(b => {
+    const bx=b.x*W,by=b.y*H,bw=b.w*W,bh=b.h*H;
+    ctx.fillStyle=b.color; ctx.fillRect(bx,by,bw,bh);
+    ctx.strokeStyle=b.border; ctx.lineWidth=1.5; ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='bold 10px JetBrains Mono,monospace';
+    ctx.fillText(b.label,bx+8,by+14);
+  });
+
+  // Incident pin — pulsing
+  const t = Date.now()/1000;
+  const incX=0.67*W, incY=0.25*H;
+  const r = 12 + Math.sin(t*3)*3;
+  ctx.beginPath(); ctx.arc(incX,incY,r,0,Math.PI*2);
+  ctx.strokeStyle=`rgba(255,45,85,${0.3+Math.sin(t*2)*.3})`; ctx.lineWidth=2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(incX,incY,8,0,Math.PI*2);
+  ctx.fillStyle='#FF2D55'; ctx.fill();
+  ctx.fillStyle='white'; ctx.font='bold 9px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('🔥',incX-4,incY+4);
+  ctx.fillStyle='rgba(255,45,85,.9)'; ctx.font='bold 9px JetBrains Mono,monospace'; ctx.textAlign='left';
+  ctx.fillText('FIRE B2',incX+12,incY+3);
+
+  // Medical pin
+  ctx.beginPath(); ctx.arc(0.3*W,0.75*H,7,0,Math.PI*2);
+  ctx.fillStyle='#FF6B35'; ctx.fill();
+  ctx.fillStyle='rgba(255,107,53,.8)'; ctx.font='bold 9px JetBrains Mono,monospace';
+  ctx.fillText('MEDICAL',0.3*W+10,0.75*H+3);
+
+  // Staff dots (live moving)
+  const staffPos = [
+    [0.45,0.35,0.1,0.35,'SR','#00D4FF'],
+    [0.55,0.65,0.1,0.38,'VE','#00FF88'],
+    [0.28,0.68,0.1,0.30,'TS','#FF6B35'],
+    [0.82,0.75,0.1,0.35,'TP','#BF5AF2'],
+  ];
+  staffPos.forEach(([bx,by,jx,jy,name,color]) => {
+    const px=(bx+(Math.sin(t*(0.3+bx))*jx))*W, py=(by+(Math.cos(t*(0.25+by))*jy))*H;
+    ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+    ctx.fillStyle=color; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.6)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle=color; ctx.font='bold 9px JetBrains Mono,monospace'; ctx.textAlign='left';
+    ctx.fillText(name,px+8,py+3);
+  });
+
+  // User dot
+  if(userLat) {
+    ctx.beginPath(); ctx.arc(0.5*W,0.5*H,7,0,Math.PI*2);
+    const grad=ctx.createRadialGradient(0.5*W,0.5*H,0,0.5*W,0.5*H,7);
+    grad.addColorStop(0,'#00D4FF'); grad.addColorStop(1,'rgba(0,212,255,.3)');
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle='white'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='rgba(0,212,255,.9)'; ctx.font='bold 9px JetBrains Mono,monospace';
+    ctx.fillText('YOU',0.5*W+10,0.5*H+3);
+  }
+
+  ctx.textAlign = 'left';
+  requestAnimationFrame(drawMap);
+}
+
+// ─── CCTV CANVAS RENDERING ───
+function drawCCTV(canvasId, hasAnomaly, scale=1) {
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width || canvas.offsetWidth;
+  const H = canvas.height;
+  canvas.width = W;
+  cctvFrame++;
+
+  // Dark noisy background (simulate camera feed)
+  ctx.fillStyle = '#0a0e12';
+  ctx.fillRect(0,0,W,H);
+
+  // Noise texture
+  const imgData = ctx.createImageData(W,H);
+  for(let i=0;i<imgData.data.length;i+=4) {
+    const n = Math.random()*20;
+    imgData.data[i]=n; imgData.data[i+1]=n; imgData.data[i+2]=n+5; imgData.data[i+3]=255;
+  }
+  ctx.putImageData(imgData,0,0);
+
+  // Room outlines
+  ctx.strokeStyle='rgba(255,255,255,.15)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(W*.1,H*.15,W*.8,H*.7);
+  ctx.strokeRect(W*.1,H*.15,W*.4,H*.35);
+  ctx.strokeStyle='rgba(255,255,255,.08)';
+  ctx.beginPath(); ctx.moveTo(W*.1,H*.5); ctx.lineTo(W*.9,H*.5); ctx.stroke();
+
+  if(hasAnomaly) {
+    // Fire simulation
+    const t = Date.now()/1000;
+    const fx=W*.32, fy=H*.38;
+    for(let i=0;i<8;i++){
+      const rx=fx+(Math.random()-.5)*W*.12, ry=fy+(Math.random()-.5)*H*.15;
+      const r=W*.03+Math.random()*W*.04;
+      const grad=ctx.createRadialGradient(rx,ry,0,rx,ry,r);
+      grad.addColorStop(0,'rgba(255,200,50,.8)');
+      grad.addColorStop(0.5,'rgba(255,80,20,.5)');
+      grad.addColorStop(1,'rgba(255,0,0,0)');
+      ctx.fillStyle=grad;
+      ctx.beginPath(); ctx.arc(rx,ry,r,0,Math.PI*2); ctx.fill();
+    }
+    // Smoke
+    for(let i=0;i<5;i++){
+      const sx=fx+(Math.random()-.5)*W*.2, sy=fy-Math.random()*H*.3;
+      const sr=W*.05+Math.random()*W*.05;
+      ctx.fillStyle=`rgba(80,80,90,${0.1+Math.random()*.15})`;
+      ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+    }
+
+    // Bounding boxes
+    bboxes.forEach(b => {
+      const bx=b.x*W,by=b.y*H,bw=b.w*W,bh=b.h*H;
+      const flicker = 0.7 + Math.sin(t*8+bx)*.3;
+      ctx.strokeStyle = b.color.replace(')',`,${flicker})`).replace('rgb','rgba');
+      ctx.lineWidth=1.5;
+      ctx.strokeRect(bx,by,bw,bh);
+      // Corner marks
+      const cs=8;
+      [[bx,by],[bx+bw,by],[bx,by+bh],[bx+bw,by+bh]].forEach(([cx,cy],ci) => {
+        ctx.strokeStyle=b.color;
+        ctx.beginPath();
+        ctx.moveTo(cx+(ci%2?-cs:0),cy); ctx.lineTo(cx+(ci%2?cs:0),cy);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx,cy+(ci>1?-cs:0)); ctx.lineTo(cx,cy+(ci>1?cs:0));
+        ctx.stroke();
+      });
+      // Label
+      ctx.fillStyle=b.color;
+      ctx.font=`bold ${Math.max(8,W*.014)}px JetBrains Mono,monospace`;
+      ctx.fillText(`${b.label} ${b.conf}`,bx+3,by-3);
+    });
+  } else {
+    // People silhouettes
+    for(let p=0;p<Math.floor(Math.random()*2+1);p++){
+      const px=W*(0.25+p*0.35), py=H*.5;
+      ctx.fillStyle='rgba(255,255,255,.12)';
+      ctx.beginPath(); ctx.ellipse(px,py-H*.05,W*.04,H*.1,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(px,py-H*.18,W*.03,0,Math.PI*2); ctx.fill();
+    }
+  }
+}
+
+function renderAllCCTV() {
+  drawCCTV('cam-b203',true);
+  drawCCTV('cam-lobby',false);
+  drawCCTV('cam-park',false);
+  drawCCTV('cam-exit',false);
+  drawCCTV('cam-focus',true);
+  drawCCTV('cctv-triage',true);
+  requestAnimationFrame(renderAllCCTV);
+}
+
+// ─── ACTIVITY FEED ───
+const feedMessages = [
+  {color:'#FF2D55',icon:'🔥',text:'<strong>Fire detected</strong> — Block B, Floor 2. AI: CRITICAL (97.3%). Auto-dispatch triggered.'},
+  {color:'#00D4FF',icon:'📱',text:'6 staff notified via Push + SMS. 3 acknowledged. Mgr. Vishal on scene.'},
+  {color:'#FF6B35',icon:'🏥',text:'<strong>Medical alert</strong> — Guest SOS from Room 218. Nurse Tangudu dispatched.'},
+  {color:'#00FF88',icon:'✓',text:'Incident #2846 (Security — Parking) resolved. Audit log saved.'},
+  {color:'#BF5AF2',icon:'📡',text:'All 8 CCTV streams verified online. AI anomaly detection active.'},
+];
+function initFeed() {
+  const feed = document.getElementById('feed');
+  if(!feed) return;
+  feedMessages.forEach((m,i) => {
+    const ago = [' just now',' 00:52 ago',' 12:03 ago',' 38 min ago',' 1h ago'][i];
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+    div.innerHTML = `<div class="feed-dot" style="background:${m.color};margin-top:4px;"></div><div><div class="feed-time">${ago}</div><div class="feed-text">${m.icon} ${m.text}</div></div>`;
+    feed.appendChild(div);
+  });
+}
+
+function simulateAlert() {
+  alertCount++;
+  const alerts = [
+    {color:'#FF6B35',icon:'🚶',text:'Suspicious activity detected — Parking Level B1. CCTV AI flagged.'},
+    {color:'#FFD60A',icon:'💨',text:'CO₂ spike — Kitchen B2. Ventilation alert. Sensor #CO2-005.'},
+    {color:'#FF2D55',icon:'🔊',text:'Noise anomaly — Pool area. Crowd density above threshold.'},
+    {color:'#BF5AF2',icon:'📡',text:'Motion sensor triggered — Server Room. Access card required.'},
+  ];
+  const alert = alerts[alertCount % alerts.length];
+  const feed = document.getElementById('feed');
+  if(!feed) return;
+  const div = document.createElement('div');
+  div.className = 'feed-item';
+  div.innerHTML = `<div class="feed-dot" style="background:${alert.color};"></div><div><div class="feed-time" style="color:${alert.color};">⚡ Just now</div><div class="feed-text">${alert.icon} <strong>NEW:</strong> ${alert.text}</div></div>`;
+  feed.insertBefore(div, feed.firstChild);
+  document.getElementById('kpi-incidents').textContent = parseInt(document.getElementById('kpi-incidents').textContent)+1;
+  showNotif('🔔 New Alert Detected!', alert.icon+' '+alert.text, alert.color);
+}
+
+// ─── SOS ───
+function selType(btn, type) {
+  sosType = type;
+  document.querySelectorAll('.sos-type-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function triggerSOS() {
+  if(sosActive) return;
+  sosActive = true;
+  const btn = document.getElementById('sos-main-btn');
+  btn.textContent = '⏳ Sending Alert...';
+  btn.style.background = '#333';
+  setTimeout(() => {
+    document.getElementById('sos-confirm').style.display = 'block';
+    btn.textContent = '✓ SENT — Help Coming!';
+    btn.style.background = 'linear-gradient(135deg,#00a86b,#007a4d)';
+    showNotif('🚨 SOS Alert Sent!', (sosType||'Emergency')+' reported — Room 412. Gemini AI classifying. GPS shared.', '#FF2D55');
+    let eta = 89;
+    const etaI = setInterval(() => {
+      eta--;
+      const e = document.getElementById('sos-eta');
+      if(e) e.textContent = eta <= 0 ? 'NOW' : eta;
+      if(eta <= 0) clearInterval(etaI);
+    }, 1000);
+    setTimeout(() => {
+      sosActive = false;
+      if(btn){btn.innerHTML='🚨 EMERGENCY SOS';btn.style.background='';}
+    }, 12000);
+  }, 1800);
+}
+
+// ─── DISPATCH ───
+function approveDispatch() {
+  document.getElementById('dispatch-btns').style.display = 'none';
+  document.getElementById('dispatch-done').style.display = 'block';
+  showNotif('✅ Dispatch Approved!', 'Fire brigade + hotel team dispatched. ETA: 4 minutes.', '#00FF88');
+  const timeline = document.getElementById('inc-timeline');
+  const div = document.createElement('div');
+  div.className = 'tl-item';
+  div.innerHTML = `<div class="tl-dot" style="background:var(--green);border-color:var(--green);"></div><div><div class="tl-time" style="color:var(--green);">NOW</div><div class="tl-text">✅ <strong>Dispatch approved</strong> — 3 units en route. Fire Brigade ETA 4 min.</div></div>`;
+  if(timeline) timeline.appendChild(div);
+}
+
+// ─── AI CHAT ───
+function sendAIMsg() {
+  const input = document.getElementById('ai-chat-input');
+  const chat = document.getElementById('ai-chat');
+  if(!input || !chat || !input.value.trim()) return;
+  const userMsg = input.value.trim();
+  input.value = '';
+  const uDiv = document.createElement('div');
+  uDiv.className = 'ai-msg from-user';
+  uDiv.innerHTML = `<div class="ai-msg-header" style="color:var(--gold);">YOU · NOW</div>${userMsg}`;
+  chat.appendChild(uDiv);
+
+  const thinking = document.createElement('div');
+  thinking.className = 'ai-thinking';
+  thinking.innerHTML = `<div class="ai-dots"><span></span><span></span><span></span></div> Gemini is analyzing...`;
+  chat.appendChild(thinking);
+  chat.scrollTop = chat.scrollHeight;
+
+  setTimeout(() => {
+    chat.removeChild(thinking);
+    const aDiv = document.createElement('div');
+    aDiv.className = 'ai-msg from-ai';
+    aDiv.innerHTML = `<div class="ai-msg-header" style="color:var(--teal);">GEMINI AI · NOW</div>${aiResponses[aiIdx % aiResponses.length]}`;
+    aiIdx++;
+    chat.appendChild(aDiv);
+    chat.scrollTop = chat.scrollHeight;
+  }, 1800 + Math.random()*1000);
+}
+
+// ─── ANOMALY TRIGGER ───
+function triggerAnomaly() {
+  anomalyActive = !anomalyActive;
+  showNotif('🔴 Anomaly Simulation', anomalyActive ? 'CCTV AI detection activated — bounding boxes enabled.' : 'Detection cleared — monitoring resumed.', anomalyActive ? '#FF2D55' : '#00FF88');
+}
+
+// ─── NOTIFICATION ───
+function showNotif(title, body, color='#FF2D55') {
+  const n = document.getElementById('notif');
+  const now = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  n.style.borderLeftColor = color;
+  document.getElementById('notif-title').textContent = title;
+  document.getElementById('notif-body').textContent = body;
+  document.getElementById('notif-time').textContent = now;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 5000);
+}
+
+// ─── PERSON COUNT RANDOMIZER ───
+setInterval(() => {
+  const pc = document.getElementById('person-count');
+  if(pc) pc.textContent = 2 + Math.floor(Math.random()*3);
+}, 3500);
+
+// ─── INIT ───
+window.onload = () => {
+  initGPS();
+  initFeed();
+  drawMap();
+  renderAllCCTV();
+};
+</script>
+</body>
+</html>
